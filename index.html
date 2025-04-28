@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards App</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #2c3e50, #1a252f);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Cairo', sans-serif;
+      color: #fff;
+      overflow: hidden;
+      user-select: none; /* منع التحديد خارج المربع */
+    }
+
+    .counter {
+      margin-bottom: 15px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .flashcard {
+      width: 400px; /* تم تكبير الكرت */
+      height: 300px; /* تم تكبير الكرت */
+      perspective: 1000px;
+      position: relative;
+      cursor: pointer;
+      margin-bottom: 30px;
+      transition: transform 0.5s ease;
+      animation: float 2s ease-in-out infinite;
+      touch-action: none; /* تعطيل التفاعل مع النصوص */
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      background: #34495e;
+    }
+
+    .card-inner.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      position: absolute;
+      backface-visibility: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px; /* تم تقليل حجم النص قليلاً ليكون أنسب */
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .card-front {
+      background: #34495e;
+      color: #fff;
+    }
+
+    .card-back {
+      background: #27ae60;
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    button {
+      padding: 12px 24px;
+      background-color: #e67e22;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #d35400;
+    }
+
+    button:disabled {
+      background-color: gray;
+      cursor: not-allowed;
+    }
+
+    /* عشان الموبايل */
+    @media (max-width: 400px) {
+      .flashcard {
+        width: 90%;
+        height: 250px;
+      }
+      .card-front, .card-back {
+        font-size: 18px;
+        padding: 15px;
+      }
+    }
+
+    /* إضافة التأثير عند الانتقال بين البطاقات */
+    .card-moving {
+      transform: scale(0.8); /* تصغير الكارت */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="counter" id="counter">1/10</div>
+
+  <div class="flashcard" id="flashcard">
+    <div class="card-inner" id="cardInner">
+      <div class="card-front" id="question">Loading...</div>
+      <div class="card-back" id="answer">Loading...</div>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button id="prevBtn" onclick="prevCard()">Previous</button>
+    <button id="nextBtn" onclick="nextCard()">Next</button>
+  </div>
+
+  <!-- الصوت -->
+  <audio id="flipSound">
+    <source src="flipcard-91468.mp3" type="audio/mp3">
+  </audio>  
+
+  <script>
+    const cards = [
+      { question: "What are the components of the musculoskeletal system?", answer: "Skeletal system (bones), Articular system (joints), Muscular system (muscles)" },
+      { question: "How many bones are there in the human body?", answer: "206 bones" },
+      { question: "What are the types of bones in the human body?", answer: "Long bones (e.g., femur), Short bones (e.g., metacarpals), Flat bones (e.g., sternum), Irregular bones (e.g., vertebra)" },
+      { question: "What is ossification?", answer: "Ossification is the process of bone formation, where the bone matrix is formed, and minerals (e.g., calcium salts) are deposited on collagen fibers." },
+      { question: "What regulates bone formation and resorption?", answer: "Local stress (weight bearing), Vitamin D (increases calcium absorption)" },
+      { question: "What are the three types of joints?", answer: "Fixed joints (e.g., skull suture), Amphiarthrosis joints (e.g., vertebral joints), Diarthrosis joints (freely movable)" },
+      { question: "What are the types of diarthrosis joints?", answer: "Ball-and-socket (e.g., hip and shoulder), Hinge (e.g., elbow and knee), Saddle (e.g., thumb joint), Pivot (e.g., radius and ulna), Gliding (e.g., carpal bones)" },
+      { question: "What is the primary source of energy for muscle contraction?", answer: "Adenosine triphosphate (ATP)" },
+      { question: "What is muscle tone?", answer: "Muscle tone is the state of readiness of a muscle to respond to stimuli, showing slight tension even when not contracted." },
+      { question: "What are common diagnostic methods for musculoskeletal disorders?", answer: "X-ray, MRI, Electromyography (EMG), Arthroscopy" }
+    ];
+
+    let currentCard = 0;
+
+    const questionElement = document.getElementById('question');
+    const answerElement = document.getElementById('answer');
+    const counterElement = document.getElementById('counter');
+    const cardInner = document.getElementById('cardInner');
+    const flipSound = document.getElementById('flipSound');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function showCard(index) {
+      questionElement.textContent = cards[index].question;
+      answerElement.textContent = cards[index].answer;
+      cardInner.classList.remove('flipped');
+      counterElement.textContent = `${index + 1}/${cards.length}`;
+      
+      prevBtn.disabled = index === 0;
+      nextBtn.disabled = index === cards.length - 1;
+    }
+
+    function flipCard() {
+      cardInner.classList.toggle('flipped');
+      flipSound.currentTime = 0;
+      flipSound.play().catch(e => { /* الصوت بيتأمن تلقائي في بعض المتصفحات */ });
+    }
+
+    function nextCard() {
+      if (currentCard < cards.length - 1) {
+        currentCard++;
+        cardInner.classList.add('card-moving'); // إضافة تأثير التصغير
+        setTimeout(() => {
+          showCard(currentCard);
+          cardInner.classList.remove('card-moving'); // إزالة التأثير بعد التبديل
+        }, 500); // التأخير ليعطي الوقت لتأثير التصغير
+        flipSound.play(); // تشغيل الصوت عند التبديل
+      }
+    }
+
+    function prevCard() {
+      if (currentCard > 0) {
+        currentCard--;
+        cardInner.classList.add('card-moving'); // إضافة تأثير التصغير
+        setTimeout(() => {
+          showCard(currentCard);
+          cardInner.classList.remove('card-moving'); // إزالة التأثير بعد التبديل
+        }, 500); // التأخير ليعطي الوقت لتأثير التصغير
+        flipSound.play(); // تشغيل الصوت عند التبديل
+      }
+    }
+
+    // للسحب (Swipe)
+    let startX = 0;
+    let startY = 0;
+
+    flashcard.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    });
+
+    flashcard.addEventListener('touchend', function(e) {
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = endX - startX;
+      const diffY = endY - startY;
+      
+      // إذا كانت الحركة أفقية فقط
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX > 0) { 
+          // سحب لليمين، إذا كان الكرت على السؤال يعرض الإجابة
+          if (!cardInner.classList.contains('flipped')) {
+            cardInner.classList.add('flipped');
+          }
+        } else {
+          // سحب لليسار، إذا كان الكرت على الإجابة يعرض السؤال
+          if (cardInner.classList.contains('flipped')) {
+            cardInner.classList.remove('flipped');
+          }
+        }
+
+        // عرض الإجابة مباشرة عند سحب لليمين أو العودة للسؤال عند سحب لليسار
+        setTimeout(() => {
+          flipSound.play();
+        }, 500);
+      }
+    });
+
+    // للضغط على الكرت
+    flashcard.addEventListener('click', flipCard);
+
+    // بدء التطبيق
+    showCard(currentCard);
+  </script>
+
+</body>
+</html>

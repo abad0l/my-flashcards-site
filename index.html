@@ -26,15 +26,15 @@
     }
 
     .flashcard {
-      width: 400px; /* تم تكبير الكرت */
-      height: 300px; /* تم تكبير الكرت */
+      width: 400px;
+      height: 300px;
       perspective: 1000px;
       position: relative;
       cursor: pointer;
       margin-bottom: 30px;
       transition: transform 0.5s ease;
       animation: float 2s ease-in-out infinite;
-      touch-action: none; /* تعطيل التفاعل مع النصوص */
+      touch-action: none;
     }
 
     @keyframes float {
@@ -67,7 +67,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 18px; /* تم تقليل حجم النص قليلاً ليكون أنسب */
+      font-size: 18px;
       padding: 20px;
       box-sizing: border-box;
       text-align: center;
@@ -98,19 +98,20 @@
       font-size: 16px;
       cursor: pointer;
       box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-      transition: background-color 0.3s;
+      transition: background-color 0.3s, transform 0.3s;
     }
 
     button:hover {
       background-color: #d35400;
+      transform: scale(1.1);
     }
 
     button:disabled {
       background-color: gray;
       cursor: not-allowed;
+      transform: none; /* لو الزرار متعطل مفيش تكبير */
     }
 
-    /* عشان الموبايل */
     @media (max-width: 400px) {
       .flashcard {
         width: 90%;
@@ -122,9 +123,8 @@
       }
     }
 
-    /* إضافة التأثير عند الانتقال بين البطاقات */
     .card-moving {
-      transform: scale(0.8); /* تصغير الكارت */
+      transform: scale(0.8);
     }
   </style>
 </head>
@@ -144,7 +144,6 @@
     <button id="nextBtn" onclick="nextCard()">Next</button>
   </div>
 
-  <!-- الصوت -->
   <audio id="flipSound">
     <source src="flipcard-91468.mp3" type="audio/mp3">
   </audio>  
@@ -186,34 +185,33 @@
     function flipCard() {
       cardInner.classList.toggle('flipped');
       flipSound.currentTime = 0;
-      flipSound.play().catch(e => { /* الصوت بيتأمن تلقائي في بعض المتصفحات */ });
+      flipSound.play().catch(e => {});
     }
 
     function nextCard() {
       if (currentCard < cards.length - 1) {
         currentCard++;
-        cardInner.classList.add('card-moving'); // إضافة تأثير التصغير
+        cardInner.classList.add('card-moving');
         setTimeout(() => {
           showCard(currentCard);
-          cardInner.classList.remove('card-moving'); // إزالة التأثير بعد التبديل
-        }, 500); // التأخير ليعطي الوقت لتأثير التصغير
-        flipSound.play(); // تشغيل الصوت عند التبديل
+          cardInner.classList.remove('card-moving');
+        }, 500);
+        flipSound.play();
       }
     }
 
     function prevCard() {
       if (currentCard > 0) {
         currentCard--;
-        cardInner.classList.add('card-moving'); // إضافة تأثير التصغير
+        cardInner.classList.add('card-moving');
         setTimeout(() => {
           showCard(currentCard);
-          cardInner.classList.remove('card-moving'); // إزالة التأثير بعد التبديل
-        }, 500); // التأخير ليعطي الوقت لتأثير التصغير
-        flipSound.play(); // تشغيل الصوت عند التبديل
+          cardInner.classList.remove('card-moving');
+        }, 500);
+        flipSound.play();
       }
     }
 
-    // للسحب (Swipe)
     let startX = 0;
     let startY = 0;
 
@@ -228,31 +226,24 @@
       const diffX = endX - startX;
       const diffY = endY - startY;
       
-      // إذا كانت الحركة أفقية فقط
       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
         if (diffX > 0) { 
-          // سحب لليمين، إذا كان الكرت على السؤال يعرض الإجابة
           if (!cardInner.classList.contains('flipped')) {
             cardInner.classList.add('flipped');
           }
         } else {
-          // سحب لليسار، إذا كان الكرت على الإجابة يعرض السؤال
           if (cardInner.classList.contains('flipped')) {
             cardInner.classList.remove('flipped');
           }
         }
-
-        // عرض الإجابة مباشرة عند سحب لليمين أو العودة للسؤال عند سحب لليسار
         setTimeout(() => {
           flipSound.play();
         }, 500);
       }
     });
 
-    // للضغط على الكرت
     flashcard.addEventListener('click', flipCard);
 
-    // بدء التطبيق
     showCard(currentCard);
   </script>
 

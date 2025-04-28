@@ -4,11 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flashcards App</title>
+
+  <!-- روابط الفافيكون -->
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
   <style>
     body {
       margin: 0;
       height: 100vh;
-      background: #201e30; /* هغيرنا الخلفية الأصلية عشان finisher-header هيتولى */
+      background: #201e30;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -20,7 +30,6 @@
       user-select: none;
     }
 
-    /* الخلفية المتحركة */
     .finisher-header {
       position: absolute;
       top: 0;
@@ -30,7 +39,6 @@
       z-index: 0;
     }
 
-    /* عناصر التطبيق */
     .counter, .flashcard, .buttons {
       position: relative;
       z-index: 1;
@@ -147,7 +155,6 @@
 </head>
 <body>
 
-  <!-- الخلفية المتحركة -->
   <div class="finisher-header"></div>
 
   <div class="counter" id="counter">1/10</div>
@@ -168,7 +175,6 @@
     <source src="flipcard-91468.mp3" type="audio/mp3">
   </audio>  
 
-  <!-- سكريبت الفلاش كارد -->
   <script>
     const cards = [
       { question: "What are the components of the musculoskeletal system?", answer: "Skeletal system (bones), Articular system (joints), Muscular system (muscles)" },
@@ -268,43 +274,20 @@
     showCard(currentCard);
   </script>
 
-  <!-- سكريبت الخلفية -->
   <script src="finisher-header.es5.min.js" type="text/javascript"></script>
   <script type="text/javascript">
     new FinisherHeader({
       "count": 100,
-      "size": {
-        "min": 2,
-        "max": 8,
-        "pulse": 0
-      },
-      "speed": {
-        "x": {
-          "min": 0,
-          "max": 0.4
-        },
-        "y": {
-          "min": 0,
-          "max": 0.6
-        }
-      },
+      "size": { "min": 2, "max": 8, "pulse": 0 },
+      "speed": { "x": { "min": 0, "max": 0.4 }, "y": { "min": 0, "max": 0.6 } },
       "colors": {
         "background": "#201e30",
-        "particles": [
-          "#fbfcca",
-          "#d7f3fe",
-          "#ffd0a7"
-        ]
+        "particles": ["#fbfcca", "#d7f3fe", "#ffd0a7"]
       },
       "blending": "overlay",
-      "opacity": {
-        "center": 1,
-        "edge": 0
-      },
+      "opacity": { "center": 1, "edge": 0 },
       "skew": -2,
-      "shapes": [
-        "c"
-      ]
+      "shapes": ["c"]
     });
   </script>
 

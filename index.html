@@ -16,22 +16,7 @@
       font-family: 'Cairo', sans-serif;
       color: #fff;
       overflow: hidden;
-      user-select: none;
-      position: relative; /* ضروري عشان الخلفية تتحكم */
-    }
-
-    .finisher-header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0; /* تخليها خلف كل العناصر */
-    }
-
-    .counter, .flashcard, .buttons {
-      position: relative; /* عشان العناصر دي تبقى فوق الخلفية */
-      z-index: 1;
+      user-select: none; /* منع التحديد خارج المربع */
     }
 
     .counter {
@@ -124,7 +109,7 @@
     button:disabled {
       background-color: gray;
       cursor: not-allowed;
-      transform: none;
+      transform: none; /* لو الزرار متعطل مفيش تكبير */
     }
 
     @media (max-width: 400px) {
@@ -145,10 +130,6 @@
 </head>
 <body>
 
-  <!-- الخلفية المتحركة -->
-  <div class="finisher-header"></div>
-
-  <!-- باقي محتوى الصفحة -->
   <div class="counter" id="counter">1/10</div>
 
   <div class="flashcard" id="flashcard">
@@ -167,7 +148,6 @@
     <source src="flipcard-91468.mp3" type="audio/mp3">
   </audio>  
 
-  <!-- سكريبتات الفلاش كارد -->
   <script>
     const cards = [
       { question: "What are the components of the musculoskeletal system?", answer: "Skeletal system (bones), Articular system (joints), Muscular system (muscles)" },
@@ -265,46 +245,6 @@
     flashcard.addEventListener('click', flipCard);
 
     showCard(currentCard);
-  </script>
-
-  <!-- سكريبت الخلفية المتحركة -->
-  <script src="https://cdn.jsdelivr.net/gh/kognise/finisher-header@latest/dist/finisher-header.es5.min.js"></script>
-  <script>
-    new FinisherHeader({
-      "count": 100,
-      "size": {
-        "min": 2,
-        "max": 8,
-        "pulse": 0
-      },
-      "speed": {
-        "x": {
-          "min": 0,
-          "max": 0.4
-        },
-        "y": {
-          "min": 0,
-          "max": 0.6
-        }
-      },
-      "colors": {
-        "background": "#201e30",
-        "particles": [
-          "#fbfcca",
-          "#d7f3fe",
-          "#ffd0a7"
-        ]
-      },
-      "blending": "overlay",
-      "opacity": {
-        "center": 1,
-        "edge": 0
-      },
-      "skew": -2,
-      "shapes": [
-        "c"
-      ]
-    });
   </script>
 
 </body>
